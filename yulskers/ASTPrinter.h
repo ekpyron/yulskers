@@ -3,11 +3,12 @@
 #include <yulskers/AST.h>
 #include <ostream>
 #include <iomanip>
+#include <string>
 
 namespace yulskers {
 
 template<int indent>
-static const auto indentation = std::string(indent, '\t');
+static auto const indentation = std::string(indent, '\t');
 
 template<typename Block, int indent = 0, bool Inline = false>
 struct PrintBlock;

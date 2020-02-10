@@ -1,0 +1,18 @@
+branches:
+  only:
+    - master
+configuration:
+    - Release
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+before_build:
+    - if not exist build mkdir build
+    - cd build
+    - cmake -G "Visual Studio 15 2017 Win64" -T llvm ..
+build_script:
+    - msbuild yulskers.sln /p:Configuration=%CONFIGURATION% /m:%NUMBER_OF_PROCESSORS% /v:minimal
+
+test_script:
+    - cd %APPVEYOR_BUILD_FOLDER%\build\test\%CONFIGURATION%
+    - yulskers_test.exe
