@@ -6,7 +6,6 @@ namespace yulskers {
 
 enum class TokenKind
 {
-	WhiteSpace,
 	String,
 	Identifier,
 	Placeholder,
@@ -32,12 +31,12 @@ enum class TokenKind
 	Colon,
 	True,
 	False,
-	Comment,
-	HexString
+	HexString,
+	EndOfStream,
+	Error
 };
 
 namespace token {
-//struct WhiteSpace { static constexpr auto kind = TokenKind::WhiteSpace; };
 template<char... c>
 struct String { static constexpr auto kind = TokenKind::String; };
 template<char... c>
@@ -68,8 +67,6 @@ struct Comma { static constexpr auto kind = TokenKind::Comma; };
 struct Colon { static constexpr auto kind = TokenKind::Colon; };
 struct True { static constexpr auto kind = TokenKind::True; };
 struct False { static constexpr auto kind = TokenKind::False; };
-//template<bool multeLine, char... cs>
-//struct Comment { static constexpr auto kind = TokenKind::Comment; };
 template<std::uint8_t...>
 struct HexString { static constexpr auto kind = TokenKind::HexString; };
 }
@@ -80,8 +77,12 @@ namespace token_traits
 	using token_type_t = Token;
 	template<typename Token>
 	struct token_kind { static constexpr auto value = Token::kind; };
+	template<>
+	struct token_kind<void> { static constexpr auto value = TokenKind::EndOfStream; };
+	template<typename... Reasons>
+	struct token_kind<Failure<Reasons...>> { static constexpr auto value = TokenKind::Error; };
 	template<typename Token>
-	constexpr auto token_kind_v = Token::kind;
+	constexpr auto token_kind_v = token_kind<Token>::value;
 	template<typename Token>
 	constexpr bool is_literal_v = token_traits::token_kind_v<Token> == TokenKind::HexNumber ||
 								  token_traits::token_kind_v<Token> == TokenKind::DecimalNumber ||

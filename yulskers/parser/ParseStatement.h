@@ -118,7 +118,7 @@ struct ParseStatementImpl<Token, Peek, std::enable_if_t<token_traits::token_kind
 	using type = parse_node_op<
 		advance_op,
 		ParseExpression,
-		IfNotToken<TokenKind::Case, Expect<TokenKind::Default, Failure<decltype("Expected case or default case."_char_list)>, false>>,
+		IfNotToken<TokenKind::Case, Expect<TokenKind::Default, decltype("Expected case or default case."_yulskers_error), false>>,
 		repeat_op<ParseCase>,
 		return_node<make_op<MakeSwitch>>
 	>;
@@ -170,9 +170,9 @@ struct ParseStatementImpl<Token, Peek, std::enable_if_t<token_traits::token_kind
 		advance_op,
 		ParseIdentifier,
 		parse_node_op<
-			Expect<TokenKind::ParenOpen, Failure<decltype("expected ("_char_list)>>,
+			Expect<TokenKind::ParenOpen, decltype("Expected (."_yulskers_error)>,
 			IfNotToken<TokenKind::ParenClose, ParseIdentifierList>,
-			Expect<TokenKind::ParenClose, Failure<decltype("expected )"_char_list)>>,
+			Expect<TokenKind::ParenClose, decltype("Expected )."_yulskers_error)>,
 			return_node<make_op<MakeTemporaryNodeList>>
 		>,
 		parse_node_op<
@@ -218,7 +218,7 @@ struct ParseCallOrAssignment
 	        advance_op,
 	        return_node<MakePlaceholder<FirstToken>>
 	    >,
-		Failure<decltype("expected call or assignment"_char_list)>
+		decltype("Expected call or assignment."_yulskers_error)
 	>;
 };
 
@@ -232,7 +232,7 @@ struct ParseCallOrAssignment<Identifier, Token, std::enable_if_t<
 {
 	using type = parse_node_op<
 		ParseIdentifierList,
-		Expect<TokenKind::Assign, Failure<decltype("expected :="_char_list)>>,
+		Expect<TokenKind::Assign, decltype("Expected :=."_yulskers_error)>,
 		ParseExpression,
 		return_node<make_op<MakeAssignment>>
 	>;
@@ -246,7 +246,7 @@ struct ParseCallOrAssignment<Identifier, Token, std::enable_if_t<
 {
 	using type = parse_node_op<
 	    ParseIdentifier,
-	    Expect<TokenKind::ParenOpen, Failure<decltype("expected ("_char_list)>>,
+	    Expect<TokenKind::ParenOpen, decltype("Expected (."_yulskers_error)>,
 	    IfNotToken<TokenKind::ParenClose,
 	    	ParseExpression,
 	    	WhileToken<TokenKind::Comma,
@@ -254,7 +254,7 @@ struct ParseCallOrAssignment<Identifier, Token, std::enable_if_t<
 	    		ParseExpression
 	    	>
 	    >,
-		Expect<TokenKind::ParenClose, Failure<decltype("Expected , or )."_char_list)>>,
+		Expect<TokenKind::ParenClose, decltype("Expected , or )."_yulskers_error)>,
 		return_node<make_op<MakeFunctionCall>>
 	>;
 };

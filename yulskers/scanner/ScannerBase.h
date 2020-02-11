@@ -6,8 +6,8 @@
 
 namespace yulskers::scanner {
 
-template<typename CharList, typename = void>
-struct Scanner: Failure<decltype("unexpected character"_char_list)> {};
+template<typename CharList, typename>
+struct Scanner: decltype("Unexpected character."_yulskers_error) {};
 
 template<>
 struct Scanner<char_list<>>

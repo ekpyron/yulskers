@@ -4,8 +4,6 @@
 
 namespace yulskers::scanner {
 
-constexpr bool isHexDigit(char c) { return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'); }
-
 static constexpr std::uint8_t hexDigitsValue(char v)
 {
 	if ('0' <= v && v <= '9') return v - '0';
@@ -38,7 +36,7 @@ struct addHexByte<token::HexString<bs...>, a, b>
 
 template<char quote, typename CharList, typename HexString = token::HexString<>, typename = void>
 struct ScanHexStringContent:
-	Failure<decltype("invalid or unterminated hex string literal"_char_list)> {};
+	decltype("Invalid or unterminated hex string literal."_yulskers_error) {};
 
 template<char quote, char c1, char c2, char... cs, typename HexString>
 struct ScanHexStringContent<quote, char_list<c1, c2, cs...>, HexString, std::enable_if_t<isHexDigit(c1) && isHexDigit(c2)>>:
@@ -53,7 +51,7 @@ struct ScanHexStringContent<quote, char_list<quote, cs...>, HexString>
 
 template<typename CharList, typename = void>
 struct ScanHexString:
-	Failure<decltype("expected hex string literal"_char_list)> {};
+	decltype("Expected hex string literal."_yulskers_error) {};
 
 template<char c, char... cs>
 struct ScanHexString<char_list<c, cs...>, std::enable_if_t<c == '"' || c == '\''>>:

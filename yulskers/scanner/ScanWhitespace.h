@@ -4,8 +4,6 @@
 
 namespace yulskers::scanner {
 
-constexpr inline bool isWhiteSpace(char c) { return c == ' ' || c == '\n' || c == '\t' || c == '\r'; }
-
 template<typename CharList, typename String = char_list<>, typename = void>
 struct ScanWhitespace:
 	Scanner<CharList> {};

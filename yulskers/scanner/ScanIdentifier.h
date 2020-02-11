@@ -5,6 +5,7 @@
 namespace yulskers::scanner {
 
 constexpr bool isDecimalDigit(char c) {	return '0' <= c && c <= '9'; }
+constexpr bool isHexDigit(char c) { return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'); }
 
 constexpr bool isIdentifierStart(char c)
 {
@@ -14,6 +15,10 @@ constexpr bool isIdentifierPart(char c)
 {
 	return isIdentifierStart(c) || isDecimalDigit(c) || c == '.';
 }
+namespace detail {
+
+template<typename Char, Char... c>
+constexpr auto operator""_keyword() {	return char_list < c...>{}; }
 
 template<typename Identifier>
 struct IdentifierOrKeyword;
@@ -23,57 +28,58 @@ struct IdentifierOrKeyword<char_list<cs...>>
 { using type = token::Identifier<cs...>; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("let"_char_list)>>
+struct IdentifierOrKeyword<decltype("let"_keyword)>
 { using type = token::Let; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("if"_char_list)>>
+struct IdentifierOrKeyword<std::decay_t<decltype("if"_keyword)>>
 { using type = token::If; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("switch"_char_list)>>
+struct IdentifierOrKeyword<decltype("switch"_keyword)>
 { using type = token::Switch; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("case"_char_list)>>
+struct IdentifierOrKeyword<decltype("case"_keyword)>
 { using type = token::Case; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("default"_char_list)>>
+struct IdentifierOrKeyword<decltype("default"_keyword)>
 { using type = token::Default; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("for"_char_list)>>
+struct IdentifierOrKeyword<decltype("for"_keyword)>
 { using type = token::For; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("break"_char_list)>>
+struct IdentifierOrKeyword<decltype("break"_keyword)>
 { using type = token::Break; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("continue"_char_list)>>
+struct IdentifierOrKeyword<decltype("continue"_keyword)>
 { using type = token::Continue; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("function"_char_list)>>
+struct IdentifierOrKeyword<decltype("function"_keyword)>
 { using type = token::Function; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("leave"_char_list)>>
+struct IdentifierOrKeyword<decltype("leave"_keyword)>
 { using type = token::Leave; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("true"_char_list)>>
+struct IdentifierOrKeyword<decltype("true"_keyword)>
 { using type = token::True; };
 
 template<>
-struct IdentifierOrKeyword<std::decay_t<decltype("false"_char_list)>>
+struct IdentifierOrKeyword<decltype("false"_keyword)>
 { using type = token::False; };
+}
 
 template<typename CharList, typename Identifier = char_list<>, typename = void>
 struct ScanIdentifier
 {
-	using type = typename IdentifierOrKeyword<Identifier>::type;
+	using type = typename detail::IdentifierOrKeyword<Identifier>::type;
 	using next = Scanner<CharList>;
 };
 

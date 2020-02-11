@@ -16,9 +16,9 @@ struct MakeBlock<type_list<Statements...>>
 
 
 struct ParseBlock: parse_node_op<
-	Expect<TokenKind::BracketOpen, Failure<decltype("expected {"_char_list)>>,
+	Expect<TokenKind::BracketOpen, decltype("Expected {."_yulskers_error)>,
 	repeat_op<ParseStatement>,
-	Expect<TokenKind::BracketClose, Failure<decltype("expected statement or }"_char_list)>>,
+	Expect<TokenKind::BracketClose, decltype("Expected statement or }."_yulskers_error)>,
 	return_node<make_op<MakeBlock>>
 > {};
 

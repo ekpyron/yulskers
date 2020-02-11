@@ -51,7 +51,7 @@ template<typename CharList>
 struct ScanNumber:
 	ScanDecimalNumber<CharList> {};
 
-template<char... cs>
-struct ScanNumber<char_list<'0', 'x', cs...>>:
-	ScanHexNumber<char_list<cs...>> {};
+template<char c, char... cs>
+struct ScanNumber<char_list<'0', 'x', c, cs...>>:
+	std::conditional_t<isHexDigit(c), ScanHexNumber<char_list<cs...>>, decltype("Expcted hex digit."_yulskers_error)> {};
 }

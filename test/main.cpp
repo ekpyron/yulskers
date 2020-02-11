@@ -1,11 +1,20 @@
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 #include <iostream>
 #include <yulskers/yulskers.h>
 #include <yulskers/ASTPrinter.h>
 
 using namespace yulskers::literals;
 
-int main()
-{
+TEST_CASE("empty block") {
+	static_assert(std::is_same_v<
+	    decltype("{}"_yulskers),
+	    yulskers::ast::Block<>
+	>);
+}
+
+
+TEST_CASE("complex source") {
 	using AST = decltype(R"(
 		{
 			for { let x := 1 } lt(x,2) { x := add(x, 1) } {
@@ -51,6 +60,4 @@ int main()
 
 	static_assert(!yulskers::is_failure_v<AST>, "");
 	yulskers::PrintAST<AST, 0>{}(std::cout);
-
-	return 0;
 }

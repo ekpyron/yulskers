@@ -34,6 +34,4 @@ struct Identifier {};
 template<typename Token>
 struct Literal {};
 
-
-
 }

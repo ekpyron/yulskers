@@ -4,4 +4,9 @@ project(yulskers)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(yulskers)
-add_subdirectory(test)
+
+include(CTest)
+
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()

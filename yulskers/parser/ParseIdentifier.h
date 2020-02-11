@@ -7,7 +7,7 @@ namespace yulskers::parser {
 template<typename Token, typename Peek>
 struct ParseIdentifierImpl
 {
-	using type = Failure<decltype("Expected identifier"_char_list)>;
+	using type = decltype("Expected identifier."_yulskers_error);
 };
 
 template<char... cs, typename Peek>

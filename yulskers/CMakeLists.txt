@@ -28,3 +28,7 @@ add_library(yulskers INTERFACE)
 target_sources(yulskers INTERFACE ${YULSKERS_HEADERS})
 
 target_include_directories(yulskers INTERFACE ${CMAKE_CURRENT_LIST_DIR}/..)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(yulskers INTERFACE -Wno-gnu-string-literal-operator-template)
+endif ()

@@ -16,7 +16,7 @@ struct MakeStringToken<char_list<cs...>>
 
 template<char quote, typename CharList, typename String = char_list<>, typename = void>
 struct ScanString:
-	Failure<decltype("unterminated string literal"_char_list)> {};
+	decltype("Unterminated string literal."_yulskers_error) {};
 
 template<char quote, char... cs, typename String>
 struct ScanString<quote, char_list<quote, cs...>, String>
@@ -65,6 +65,6 @@ struct ScanString<quote, char_list<'\\', 'v', cs...>, String>:
 
 template<char quote, typename String>
 struct ScanString<quote, char_list<'\\'>, String>:
-	Failure<decltype("invalid escape"_char_list)> {};
+	decltype("Invalid escape."_yulskers_error) {};
 
 }

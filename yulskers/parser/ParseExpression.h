@@ -8,7 +8,7 @@ namespace yulskers::parser {
 template<typename Token, typename Peek, typename = void>
 struct ParseExpressionImpl
 {
-	using type = Failure<decltype("expected expression"_char_list)>;
+	using type = decltype("Expected expression."_yulskers_error);
 };
 
 using ParseExpression = parse_token_op<ParseExpressionImpl>;
@@ -46,7 +46,7 @@ struct ParseExpressionImpl<Token, Peek, std::enable_if_t<
 						ParseExpression
 					>
 			>,
-			Expect<TokenKind::ParenClose, Failure<decltype("Expected , or )."_char_list)>>,
+			Expect<TokenKind::ParenClose, decltype("Expected , or )."_yulskers_error)>,
 			return_node<make_op<MakeFunctionCall>>
 	    >,
 	    return_node<make_op<MakeExpression>>
@@ -56,7 +56,7 @@ struct ParseExpressionImpl<Token, Peek, std::enable_if_t<
 template<typename Token, typename Peek, typename = void>
 struct ParseLiteralImpl
 {
-	using type = Failure<decltype("expected literal"_char_list)>;
+	using type = decltype("Expected literal."_yulskers_error);
 };
 template<typename Token, typename Peek>
 struct ParseLiteralImpl<Token, Peek, std::enable_if_t<token_traits::is_literal_v<Token>>>

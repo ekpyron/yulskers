@@ -5,7 +5,7 @@
 namespace yulskers::scanner {
 
 template<bool multiLine, typename CharList>
-struct ScanComment: Failure<decltype("unterminated comment"_char_list)> {};
+struct ScanComment: decltype("Unterminated comment."_yulskers_error) {};
 
 template<char c, char... cs>
 struct ScanComment<true, char_list<c, cs...>>:

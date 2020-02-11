@@ -11,10 +11,20 @@ namespace yulskers::parser
 namespace detail {
 	template<typename State, template<typename...> typename Op, typename = void>
 	struct parse_token_op_impl:
-		Failure<decltype("Unexpected end of stream."_char_list)> {};
+		decltype("Unexpected end of stream."_yulskers_error) {};
 	template<typename State, template<typename...> typename Op>
-	struct parse_token_op_impl<State, Op, std::enable_if_t<has_token_left_v<State>>> {
+	struct parse_token_op_impl<State, Op, std::enable_if_t<has_token_left_v<State> && !scanner_error_v<State>>>
+	{
 		using type = apply_op<State, typename Op<current_token_t<State>, next_token_or_void_t<State>>::type>;
+	};
+	template<typename State, template<typename...> typename Op>
+	struct parse_token_op_impl<State, Op, std::enable_if_t<scanner_error_v<State>>> {
+		using type =
+		std::conditional_t<
+			token_traits::token_kind_v<current_token_t<State>> == TokenKind::Error,
+			current_token_t<State>,
+			next_token_or_void_t<State>
+		>;
 	};
 }
 
@@ -76,6 +86,9 @@ struct ExpectImpl { using type = Otherwise; };
 template<typename State, TokenKind kind, typename Otherwise, bool advance>
 struct ExpectImpl<State, kind, Otherwise, advance, std::enable_if_t<token_traits::token_kind_v<current_token_t<State>> == kind>>
 : std::conditional<advance, advance_t<State>, State> {};
+template<typename State, TokenKind kind, typename Otherwise, bool advance>
+struct ExpectImpl<State, kind, Otherwise, advance, std::enable_if_t<token_traits::token_kind_v<current_token_t<State>> == TokenKind::Error>>
+{ using type = current_token_t<State>; };
 
 }
 
@@ -94,7 +107,6 @@ using IfNotToken = Expect<tokenKind, op_chain<Op...>, false>;
 
 template<TokenKind tokenKind, typename... Op>
 using WhileToken = repeat_op<op_chain<Expect<tokenKind, op_chain_break, false>, Op...>>;
-
 
 template<typename Op>
 struct return_node

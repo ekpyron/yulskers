@@ -74,10 +74,16 @@ namespace detail {
 		using result = Result;
 		using tail = Tail;
 	};
-	template<typename OrigState, typename Reason, typename Tail>
-	struct op_chain_step_result<OrigState, Failure<Reason>, Tail>
+	template<typename OrigState, typename Message, typename Cause, typename... Reasons, typename Tail>
+	struct op_chain_step_result<OrigState, Failure<Message, Cause, Reasons...>, Tail>
 	{
-		using result = Failure<Reason>;
+		using result = Failure<Message, Cause, Reasons...>;
+		using tail = type_list<>;
+	};
+	template<typename OrigState, typename Message, typename Tail>
+	struct op_chain_step_result<OrigState, Failure<Message>, Tail>
+	{
+		using result = Failure<Message, OrigState>;
 		using tail = type_list<>;
 	};
 	template<typename OrigState, typename Tail>

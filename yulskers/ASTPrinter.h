@@ -357,15 +357,12 @@ struct PrintBlock<ast::Block<Statements...>, indent, Inline>
 	}
 };
 
-template<typename AST, int indent = 0>
-struct PrintAST;
-
-template<typename... Blocks, int indent>
-struct PrintAST<type_list<Blocks...>, indent>
+template<typename Block, int indent = 0>
+struct PrintAST
 {
 	void operator()(std::ostream& _stream) const
 	{
-		(PrintBlock<Blocks, indent>{}(_stream), ...);
+		PrintBlock<Block, indent>{}(_stream);
 	}
 };
 

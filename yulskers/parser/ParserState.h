@@ -22,7 +22,11 @@ namespace detail {
 	template<typename Scanner, typename = void>
 	struct hasTokensLeft { static constexpr bool value = false; };
 	template<typename Scanner>
-	struct hasTokensLeft<Scanner, std::void_t<typename Scanner::type>> { static constexpr bool value = !std::is_same_v<typename Scanner::type, void>; };
+	struct hasTokensLeft<Scanner, std::void_t<typename Scanner::type>>
+	{
+		static constexpr auto tokenKind = token_traits::token_kind_v<typename Scanner::type>;
+		static constexpr bool value = tokenKind != TokenKind::EndOfStream && tokenKind != TokenKind::Error;
+	};
 }
 
 template<typename Scanner, typename AST>
@@ -31,10 +35,12 @@ struct ParserState
 	using currentToken = typename detail::getCurrentToken<Scanner>::type;
 	using nextScanner = typename detail::getNextScanner<Scanner>::type;
 	using nextToken = typename detail::getCurrentToken<nextScanner>::type;
-	static constexpr bool hasTokensLeft = detail::hasTokensLeft<Scanner>::value;//!std::is_same_v<typename Scanner::next, void>;
+	static constexpr bool hasTokensLeft = detail::hasTokensLeft<Scanner>::value;
+	static constexpr bool scannerError =
+		token_traits::token_kind_v<currentToken> == TokenKind::Error ||
+		token_traits::token_kind_v<nextToken> == TokenKind::Error;
 	using ast = AST;
 };
-
 
 template<typename State>
 using advance_t = ParserState<typename State::nextScanner, typename State::ast>;
@@ -44,6 +50,8 @@ template<typename State>
 using next_token_or_void_t = typename State::nextToken;
 template<typename State>
 static constexpr bool has_token_left_v = State::hasTokensLeft;
+template<typename State>
+static constexpr bool scanner_error_v = State::scannerError;
 
 using EmptyAST = type_list<>;
 
@@ -83,14 +91,6 @@ struct parser_replace_ast<ParserState<TokenList, OldAST>, NewAST>
 	using type = ParserState<TokenList, NewAST>;
 };
 
-
-template<typename State>
-struct num_nodes;
-template<typename TokenList, typename... Nodes>
-struct num_nodes<ParserState<TokenList, type_list<Nodes...>>>: std::integral_constant<std::size_t, sizeof...(Nodes)> {};
-template<typename State>
-static constexpr auto num_nodes_v = num_nodes<State>::value;
-
 template<typename State, typename Node>
 struct push_node
 {
@@ -98,7 +98,5 @@ struct push_node
 };
 template<typename State, typename Node>
 using push_node_t = typename push_node<State, Node>::type;
-
-
 
 }
