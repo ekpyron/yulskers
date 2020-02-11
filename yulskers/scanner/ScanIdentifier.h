@@ -70,12 +70,15 @@ template<>
 struct IdentifierOrKeyword<std::decay_t<decltype("false"_char_list)>>
 { using type = token::False; };
 
-template<typename State, typename CharList, typename Identifier = char_list<>, typename = void>
-struct ScanIdentifier:
-	Scanner<add_token_t<State, typename IdentifierOrKeyword<Identifier>::type>, CharList> {};
+template<typename CharList, typename Identifier = char_list<>, typename = void>
+struct ScanIdentifier
+{
+	using type = typename IdentifierOrKeyword<Identifier>::type;
+	using next = Scanner<CharList>;
+};
 
-template<typename State, char c, char... cs, typename Identifier>
-struct ScanIdentifier<State, char_list<c, cs...>, Identifier, std::enable_if_t<isIdentifierPart(c)>>:
-	ScanIdentifier<advance_t<State>, char_list<cs...>, char_list_add_t<Identifier, c>> {};
+template<char c, char... cs, typename Identifier>
+struct ScanIdentifier<char_list<c, cs...>, Identifier, std::enable_if_t<isIdentifierPart(c)>>:
+	ScanIdentifier<char_list<cs...>, char_list_add_t<Identifier, c>> {};
 
 }

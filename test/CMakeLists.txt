@@ -1,7 +1,2 @@
 add_executable(yulskers_test main.cpp)
 target_link_libraries(yulskers_test yulskers)
-if (WIN32)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -ftemplate-depth -Xclang 2000")
-else ()
-	target_compile_options(yulskers_test PUBLIC -ftemplate-depth=2000)
-endif ()

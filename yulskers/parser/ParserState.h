@@ -4,17 +4,54 @@
 
 namespace yulskers::parser {
 
-template<typename TokenList, typename AST>
+namespace detail {
+	template<typename Scanner, typename = void>
+	struct getCurrentToken { using type = void; };
+	template<typename Scanner>
+	struct getCurrentToken<Scanner, std::void_t<typename Scanner::type>>
+	{
+		using type = typename Scanner::type;
+	};
+	template<typename Scanner, typename = void>
+	struct getNextScanner { using type = void; };
+	template<typename Scanner>
+	struct getNextScanner<Scanner, std::void_t<typename Scanner::next>>
+	{
+		using type = typename Scanner::next;
+	};
+	template<typename Scanner, typename = void>
+	struct hasTokensLeft { static constexpr bool value = false; };
+	template<typename Scanner>
+	struct hasTokensLeft<Scanner, std::void_t<typename Scanner::type>> { static constexpr bool value = !std::is_same_v<typename Scanner::type, void>; };
+}
+
+template<typename Scanner, typename AST>
 struct ParserState
 {
-	using tokens = TokenList;
+	using currentToken = typename detail::getCurrentToken<Scanner>::type;
+	using nextScanner = typename detail::getNextScanner<Scanner>::type;
+	using nextToken = typename detail::getCurrentToken<nextScanner>::type;
+	static constexpr bool hasTokensLeft = detail::hasTokensLeft<Scanner>::value;//!std::is_same_v<typename Scanner::next, void>;
 	using ast = AST;
 };
 
-template<typename TokenList>
-using ParserStateInit = ParserState<drop_comment_tokens_t<drop_whitespace_tokens_t<TokenList>>, type_list<>>;
+
+template<typename State>
+using advance_t = ParserState<typename State::nextScanner, typename State::ast>;
+template<typename State>
+using current_token_t = typename State::currentToken;
+template<typename State>
+using next_token_or_void_t = typename State::nextToken;
+template<typename State>
+static constexpr bool has_token_left_v = State::hasTokensLeft;
 
 using EmptyAST = type_list<>;
+
+template<typename CharList>
+struct ParserStateInit
+{
+	using type = ParserState<scanner::Scanner<CharList>, EmptyAST>;
+};
 
 template<typename State>
 struct parser_current_ast;
@@ -46,46 +83,6 @@ struct parser_replace_ast<ParserState<TokenList, OldAST>, NewAST>
 	using type = ParserState<TokenList, NewAST>;
 };
 
-template<typename State, std::size_t N>
-struct pop_tokens;
-template<typename State, std::size_t N>
-using pop_tokens_t = typename pop_tokens<State, N>::type;
-template<typename TokenList, typename AST, std::size_t N>
-struct pop_tokens<ParserState<TokenList, AST>, N>
-{
-	using type = ParserState<type_list_drop_first_t<TokenList, N>, AST>;
-};
-
-template<typename State, std::size_t N>
-struct nth_token;
-template<typename State, std::size_t N>
-using nth_token_t = typename nth_token<State, N>::type;
-template<typename TokenList, typename AST, std::size_t N>
-struct nth_token<ParserState<TokenList, AST>, N>
-{
-	using type = type_list_get_t<TokenList, N>;
-};
-
-template<typename State, std::size_t N, typename = void>
-struct nth_token_or_void { using type = void; };
-template<typename State, std::size_t N>
-using nth_token_or_void_t = typename nth_token_or_void<State, N>::type;
-template<typename State, std::size_t N>
-struct nth_token_or_void<State, N, std::void_t<typename nth_token<State, N>::type>>
-{
-	using type = nth_token_t<State, N>;
-};
-
-template<typename State>
-struct num_tokens;
-template<typename TokenList, typename AST>
-struct num_tokens<ParserState<TokenList, AST>>
-{
-	static constexpr auto value = TokenList::size;
-};
-template<typename State>
-static constexpr auto num_tokens_v = num_tokens<State>::value;
-
 
 template<typename State>
 struct num_nodes;
@@ -102,25 +99,6 @@ struct push_node
 template<typename State, typename Node>
 using push_node_t = typename push_node<State, Node>::type;
 
-template<typename State>
-struct current_token { using type = void; };
-template<typename TokenList, typename AST>
-struct current_token<ParserState<TokenList, AST>> {
-	static_assert(num_tokens_v<ParserState<TokenList, AST>> > 0, "Unexpected end of stream.");
-	using type = type_list_first_t<TokenList>;
-};
-template<typename State>
-using current_token_t = typename current_token<State>::type;
 
-template<typename State>
-struct next_token: Failure<decltype("expected more tokens"_char_list)> {};
 
-template<typename TokenList, typename AST>
-struct next_token<ParserState<TokenList, AST>>
-{
-	using type = ParserState<type_list_drop_first_t<TokenList>, AST>;
-};
-
-template<typename State>
-using next_token_t = typename next_token<State>::type;
 }

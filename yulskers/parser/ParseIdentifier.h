@@ -4,24 +4,24 @@
 
 namespace yulskers::parser {
 
-template<typename Token>
+template<typename Token, typename Peek>
 struct ParseIdentifierImpl
 {
 	using type = Failure<decltype("Expected identifier"_char_list)>;
 };
 
-template<char... cs, size_t start, size_t end>
-struct ParseIdentifierImpl<Token<token::Identifier<cs...>, start, end>>
+template<char... cs, typename Peek>
+struct ParseIdentifierImpl<token::Identifier<cs...>, Peek>
 {
-	using type = parse_node_op<return_node<const_op<ast::Identifier < cs...>>>>;
+	using type = parse_node_op<advance_op, return_node<const_op<ast::Identifier < cs...>>>>;
 };
 
-template<char... cs, size_t start, size_t end>
-struct ParseIdentifierImpl<Token<token::Placeholder<cs...>, start, end>>
+template<char... cs, typename Peek>
+struct ParseIdentifierImpl<token::Placeholder<cs...>, Peek>
 {
-	using type = parse_node_op<return_node<const_op<ast::Placeholder<cs...>>>>;
+	using type = parse_node_op<advance_op, return_node<const_op<ast::Placeholder<cs...>>>>;
 };
 
-using ParseIdentifier = parse_token_op<ParseIdentifierImpl, 1, 1>;
+using ParseIdentifier = parse_token_op<ParseIdentifierImpl>;
 
 }

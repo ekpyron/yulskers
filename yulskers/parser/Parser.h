@@ -16,15 +16,15 @@ struct ParserStateResultAST<result, std::enable_if_t<!is_failure_v<result>>>
 };
 }
 
-template<typename TokenList>
+template<typename CharList>
 struct Parse
 {
 	using type = typename detail::ParserStateResultAST<apply_op_t<
-		ParserStateInit<TokenList>,
+		typename ParserStateInit<CharList>::type,
 		ParseBlock
 	>>::type;
 };
-template<typename TokenList>
-using parse = typename Parse<TokenList>::type;
+template<char... c>
+using parse = typename Parse<char_list<c...>>::type;
 
 }

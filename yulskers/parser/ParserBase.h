@@ -9,20 +9,29 @@ namespace yulskers::parser
 {
 
 namespace detail {
-	template<typename State, template<typename...> typename Op, typename ElemList, std::size_t Consume, typename = void>
+	template<typename State, template<typename...> typename Op, typename = void>
 	struct parse_token_op_impl:
 		Failure<decltype("Unexpected end of stream."_char_list)> {};
-	template<typename State, template<typename...> typename Op, std::size_t...N, std::size_t Consume>
-	struct parse_token_op_impl<State, Op, std::index_sequence<N...>, Consume, std::enable_if_t<num_tokens_v<State> >= sizeof...(N)>> {
-		using type = apply_op<pop_tokens_t<State, Consume>, typename Op<nth_token_t<State, N>...>::type>;
+	template<typename State, template<typename...> typename Op>
+	struct parse_token_op_impl<State, Op, std::enable_if_t<has_token_left_v<State>>> {
+		using type = apply_op<State, typename Op<current_token_t<State>, next_token_or_void_t<State>>::type>;
 	};
 }
 
-template<template<typename...> typename Op, std::size_t Peek, std::size_t Consume>
+struct advance_op
+{
+	template<typename State>
+	struct apply
+	{
+		using type = advance_t<State>;
+	};
+};
+
+template<template<typename...> typename Op>
 struct parse_token_op
 {
 	template<typename State>
-	using apply = typename detail::parse_token_op_impl<State, Op, std::make_index_sequence<Peek>, Consume>::type;
+	using apply = typename detail::parse_token_op_impl<State, Op>::type;
 };
 
 namespace detail {
@@ -65,12 +74,8 @@ namespace detail {
 template<typename State, TokenKind kind, typename Otherwise, bool advance, typename = void>
 struct ExpectImpl { using type = Otherwise; };
 template<typename State, TokenKind kind, typename Otherwise, bool advance>
-struct ExpectImpl<State, kind, Otherwise, advance, std::void_t<typename current_token_t<State>::type>>
-: std::conditional<
-	token_traits::token_kind_v<current_token_t<State>> == kind,
-	std::conditional_t<advance, pop_tokens_t<State, 1>, State>,
-	Otherwise
-> {};
+struct ExpectImpl<State, kind, Otherwise, advance, std::enable_if_t<token_traits::token_kind_v<current_token_t<State>> == kind>>
+: std::conditional<advance, advance_t<State>, State> {};
 
 }
 
@@ -81,15 +86,15 @@ struct Expect
 	using apply = detail::ExpectImpl<State, kind, apply_op_t<State, Otherwise>, advance>;
 };
 
-template<std::size_t N = 1>
-struct pop_tokens_op
-{
-	template<typename State>
-	struct apply
-	{
-		using type = pop_tokens_t<State, N>;
-	};
-};
+template<TokenKind tokenKind, typename... Op>
+using IfToken = op_chain<Expect<tokenKind, op_chain_break, false>,	Op...>;
+
+template<TokenKind tokenKind, typename... Op>
+using IfNotToken = Expect<tokenKind, op_chain<Op...>, false>;
+
+template<TokenKind tokenKind, typename... Op>
+using WhileToken = repeat_op<op_chain<Expect<tokenKind, op_chain_break, false>, Op...>>;
+
 
 template<typename Op>
 struct return_node
