@@ -1,4 +1,10 @@
-add_executable(yulskers_static_compile_time_tests static_compile_time_tests.cpp)
+
+add_executable(yulskers_static_compile_time_tests
+        static/Block.cpp
+        static/Expression.cpp
+        static/FailureCases.cpp
+        static/main.cpp
+)
 target_link_libraries(yulskers_static_compile_time_tests yulskers)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/catch2/cmake)

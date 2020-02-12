@@ -53,5 +53,5 @@ struct ScanNumber:
 
 template<char c, char... cs>
 struct ScanNumber<char_list<'0', 'x', c, cs...>>:
-	std::conditional_t<isHexDigit(c), ScanHexNumber<char_list<cs...>>, decltype("Expcted hex digit."_yulskers_error)> {};
+	std::conditional_t<isHexDigit(c), ScanHexNumber<char_list<c, cs...>>, decltype("Expcted hex digit."_yulskers_error)> {};
 }

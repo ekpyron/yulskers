@@ -1,25 +1,10 @@
 #include <yulskers/yulskers.h>
-#include <iostream>
 
 using namespace yulskers;
 using namespace yulskers::literals;
-/*
-#include <cxxabi.h>
-template<typename T>
-void printType()
-{
-	int status;
-	char *result = __cxxabiv1::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status);
-	std::cout << std::string(result) << std::endl;
-	if constexpr(is_failure_v<T>)
-		std::cout << T::message() << std::endl;
-	free(result);
-}
-*/
+
 template<typename Char, Char... c>
 constexpr auto operator""_char_list() { return char_list<c...>{}; }
-
-/// Failure cases
 
 static_assert(std::is_same_v<
 	decltype(""_yulskers_allow_failure),
@@ -120,37 +105,24 @@ static_assert(std::is_same_v<
 >);
 static_assert(std::is_same_v<
 	decltype("{ hex'"_yulskers_allow_failure),
-	Failure<decltype("Invalid or unterminated hex string literal."_char_list), failure::WhileParsing<'h', 'e', 'x', '\''>>
+	Failure<
+		decltype("Invalid or unterminated hex string literal."_char_list),
+		failure::WhileParsing<'h', 'e', 'x', '\''>
+	>
 >);
 static_assert(std::is_same_v<
 	decltype("{ hex'0"_yulskers_allow_failure),
-	Failure<decltype("Invalid or unterminated hex string literal."_char_list), failure::WhileParsing<'h', 'e', 'x', '\'', '0'>>
+	Failure<
+		decltype("Invalid or unterminated hex string literal."_char_list),
+		failure::WhileParsing<'h', 'e', 'x', '\'', '0'>
+	>
 >);
 static_assert(std::is_same_v<
 	decltype("{ hex'0'"_yulskers_allow_failure),
-	Failure<decltype("Invalid or unterminated hex string literal."_char_list), failure::WhileParsing<'h', 'e', 'x', '\'', '0', '\''>>
+	Failure<
+		decltype("Invalid or unterminated hex string literal."_char_list),
+		failure::WhileParsing<'h', 'e', 'x', '\'', '0', '\''>
+	>
 >);
 
-/// ast::Block
-static_assert(std::is_same_v<
-    decltype("{}"_yulskers_block),
-    ast::Block<>
->);
-static_assert(std::is_same_v<
-	decltype("{{}}"_yulskers_block),
-	ast::Block<ast::Block<>>
->);
-static_assert(std::is_same_v<
-	decltype("{ { } { } }"_yulskers_block),
-	ast::Block<ast::Block<>, ast::Block<>>
->);
-static_assert(std::is_same_v<
-	decltype("{ { {} } { } }"_yulskers_block),
-	ast::Block<ast::Block<ast::Block<>>, ast::Block<>>
->);
-
-int main()
-{
-//	printType<decltype("{}"_yulskers_block)>();
-	return EXIT_SUCCESS;
-}
+bool failure_cases_checked() { return true; }

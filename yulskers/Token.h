@@ -53,9 +53,9 @@ struct Break { static constexpr auto kind = TokenKind::Break; };
 struct Continue { static constexpr auto kind = TokenKind::Continue; };
 struct Function { static constexpr auto kind = TokenKind::Function; };
 struct Leave { static constexpr auto kind = TokenKind::Leave; };
-template<char...>
+template<int...>
 struct HexNumber { static constexpr auto kind = TokenKind::HexNumber; };
-template<char...>
+template<int...>
 struct DecimalNumber { static constexpr auto kind = TokenKind::DecimalNumber; };
 struct BracketOpen { static constexpr auto kind = TokenKind::BracketOpen; };
 struct BracketClose { static constexpr auto kind = TokenKind::BracketClose; };

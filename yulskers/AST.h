@@ -34,4 +34,11 @@ struct Identifier {};
 template<typename Token>
 struct Literal {};
 
+namespace literals {
+template<typename Char, Char... c>
+constexpr auto operator""_yulskers_identifier() { return Identifier<c...>{}; }
+template<typename Char, Char... c>
+constexpr auto operator""_yulskers_placeholder() { return Placeholder<c...>{}; }
+}
+
 }

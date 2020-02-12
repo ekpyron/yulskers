@@ -19,6 +19,12 @@ constexpr auto operator""_yulskers_block()
 	return check_for_failure_t<result>{};
 }
 
+template<typename Char, Char... c>
+constexpr auto operator""_yulskers_expression()
+{
+	using result = yulskers::parser::parse<yulskers::parser::ParseExpression, c...>;
+	return check_for_failure_t<result>{};
+}
 
 template<typename Char, Char... c>
 constexpr auto operator""_yulskers_allow_failure()
